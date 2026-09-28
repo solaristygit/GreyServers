@@ -1,3 +1,2 @@
-# working on cosmetics
-hopefully will be out soon:
-
+# GreyServers
+lightweight and only working ones with cosmetics
