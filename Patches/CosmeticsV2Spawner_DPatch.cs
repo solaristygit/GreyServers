@@ -15,9 +15,16 @@ public class CosmeticsV2Spawner_DPatch
 
         if (!dict.ContainsKey(rig))
         {
-            Debug.LogWarning($"{rig.gameObject.name} not found in dict, registering...");
-            if (rig.isOfflineVRRig) dict[rig] = 0;
-            else return false;
+            if (rig.isOfflineVRRig)
+            {
+                Debug.LogWarning($"{rig.gameObject.name} not found in dict, registering...");
+                dict[rig] = 0;
+            }
+            else
+            {
+                Debug.Log("[GreyServers] Remote rig not in local cosmetic cache; letting native handler continue.");
+                return true;
+            }
         }
 
         int index = dict[rig];
@@ -29,19 +36,23 @@ public class CosmeticsV2Spawner_DPatch
             allLoadOpDicts = traverse.Field("_g_loadOpInfosForRigAndCosmeticIDDicts").GetValue() as Array;
         }
 
-        if (allLoadOpDicts == null || index >= allLoadOpDicts.Length) return false;
+        if (allLoadOpDicts == null || index >= allLoadOpDicts.Length)
+        {
+            Debug.LogWarning($"cosmetic data for rig index {index} is unavailable; letting native handler continue.");
+            return true;
+        }
 
         var rigDict = allLoadOpDicts.GetValue(index) as System.Collections.IDictionary;
         if (rigDict == null)
         {
-            Debug.LogError($"cosmetic data for rig index {index} is STILL null; skipping");
-            return false;
+            Debug.LogError($"cosmetic data for rig index {index} is STILL null; letting native handler continue.");
+            return true;
         }
 
         if (!rigDict.Contains(playfabId))
         {
-            Debug.LogWarning($"cosmetic id {playfabId} not found in spawner data; skipping");
-            return false;
+            Debug.LogWarning($"cosmetic id {playfabId} not found in spawner data; letting native handler continue.");
+            return true;
         }
 
         return true;
