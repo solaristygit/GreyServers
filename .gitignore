@@ -211,6 +211,9 @@ PublishScripts/
 # Nuget personal access tokens and Credentials
 nuget.config
 
+# Local cloudscript revision notes / scratch files
+cloudscript legay revision.txt
+
 # Microsoft Azure Build Output
 csx/
 *.build.csdef

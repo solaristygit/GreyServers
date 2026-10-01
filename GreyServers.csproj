@@ -5,18 +5,26 @@
 	  <Configurations>Debug;Release;BepInEx_Release;MelonLoader_Release</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release' Or '$(Configuration)' == 'BepInEx_Release'">
+    <DefineConstants>$(DefineConstants);BEPINEX_RELEASE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'MelonLoader_Release'">
+    <DefineConstants>$(DefineConstants);MELONLOADER_RELEASE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>$(BepInExAssemblyPath)\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="AA.Mothership">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\AA.Mothership.dll</HintPath>
+    <HintPath>$(GameAssemblyPath)\AA.Mothership.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Assembly-CSharp.dll</HintPath>
+    <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    <HintPath>$(GameAssemblyPath)\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="BakeryRuntimeAssembly">
       <HintPath>$(GameAssemblyPath)\BakeryRuntimeAssembly.dll</HintPath>
@@ -28,9 +36,9 @@
       <HintPath>$(BepInExAssemblyPath)\BepInEx.Harmony.dll</HintPath>
     </Reference>
     <Reference Include="com.rlabrecque.steamworks.net">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\com.rlabrecque.steamworks.net.dll</HintPath>
+    <HintPath>$(GameAssemblyPath)\com.rlabrecque.steamworks.net.dll</HintPath>
     </Reference>
-    <Reference Include="MelonLoader">
+    <Reference Include="MelonLoader" Condition="'$(Configuration)' == 'MelonLoader_Release'">
       <HintPath>..\..\..\Downloads\MelonLoader.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Security">
