@@ -68,4 +68,37 @@ namespace GreyServers.Patches
                 _alreadyResolved = true;
 
                 Debug.Log(
-                    "[GreyServers] Local subscription resolved without Moth
+                    "[GreyServers] Local subscription resolved without Mothership."
+                );
+
+                if (initializedCallbackField != null)
+                {
+                    Action callback =
+                        initializedCallbackField.GetValue(null) as Action;
+
+                    callback?.Invoke();
+                }
+
+                if (resolvedCallbackField != null)
+                {
+                    Action callback =
+                        resolvedCallbackField.GetValue(null) as Action;
+
+                    callback?.Invoke();
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(
+                    "[GreyServers] Failed to resolve local subscription:\n" + ex
+                );
+
+                _alreadyResolved = false;
+                return true;
+            }
+        }
+    }
+}
+
