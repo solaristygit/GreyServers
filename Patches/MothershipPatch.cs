@@ -1,4 +1,6 @@
-﻿using System;
+
+using System;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 
@@ -7,40 +9,64 @@ namespace GreyServers.Patches
     [HarmonyPatch(typeof(MothershipClientApiUnity), nameof(MothershipClientApiUnity.IsEnabled))]
     public static class MothershipPatch
     {
-        public static bool Prefix(ref bool __result)
+        private static bool Prefix(ref bool __result)
         {
             __result = false;
             return false;
         }
     }
 
-    [HarmonyPatch(typeof(GorillaTagScripts.SubscriptionManager), "InitializePersonalSubscriptionData")]
-    public static class Patch_SubscriptionResolutionWithoutMothership
+    [HarmonyPatch(
+        typeof(GorillaTagScripts.SubscriptionManager),
+        "InitializePersonalSubscriptionData"
+    )]
+    public static class SubscriptionManagerPatch
     {
+        private static bool _alreadyResolved;
+
         private static bool Prefix()
         {
-            var initializedField = AccessTools.Field(typeof(GorillaTagScripts.SubscriptionManager), "_localSubscriptionDataInitialized");
-            var resolvedField = AccessTools.Field(typeof(GorillaTagScripts.SubscriptionManager), "_localSubscriptionDataResolved");
-            var initializedCallbackField = AccessTools.Field(typeof(GorillaTagScripts.SubscriptionManager), "OnLocalSubscriptionData");
-            var resolvedCallbackField = AccessTools.Field(typeof(GorillaTagScripts.SubscriptionManager), "OnLocalSubscriptionDataResolved");
+            if (_alreadyResolved)
+                return false;
 
-            if (initializedField == null || resolvedField == null || initializedCallbackField == null || resolvedCallbackField == null)
+            Type manager = typeof(GorillaTagScripts.SubscriptionManager);
+
+            FieldInfo initializedField =
+                AccessTools.Field(manager, "_localSubscriptionDataInitialized");
+
+            FieldInfo resolvedField =
+                AccessTools.Field(manager, "_localSubscriptionDataResolved");
+
+            FieldInfo initializedCallbackField =
+                AccessTools.Field(manager, "OnLocalSubscriptionData");
+
+            FieldInfo resolvedCallbackField =
+                AccessTools.Field(manager, "OnLocalSubscriptionDataResolved");
+
+            if (initializedField == null || resolvedField == null)
             {
-                Debug.LogError("[GreyServers] Subscription fields were not found; leaving native initialization enabled.");
+                Debug.LogWarning(
+                    "[GreyServers] SubscriptionManager fields not found."
+                );
+
                 return true;
             }
 
-            if ((bool)resolvedField.GetValue(null))
+            try
             {
-                return false;
-            }
+                bool alreadyResolved =
+                    resolvedField.GetValue(null) is bool value && value;
 
-            initializedField.SetValue(null, true);
-            resolvedField.SetValue(null, true);
-            Debug.Log("[GreyServers] Mothership is disabled; resolving local subscriptions as inactive.");
-            (initializedCallbackField.GetValue(null) as Action)?.Invoke();
-            (resolvedCallbackField.GetValue(null) as Action)?.Invoke();
-            return false;
-        }
-    }
-}
+                if (alreadyResolved)
+                {
+                    _alreadyResolved = true;
+                    return false;
+                }
+
+                initializedField.SetValue(null, true);
+                resolvedField.SetValue(null, true);
+
+                _alreadyResolved = true;
+
+                Debug.Log(
+                    "[GreyServers] Local subscription resolved without Moth
